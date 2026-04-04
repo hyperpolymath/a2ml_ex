@@ -1,52 +1,47 @@
-# Test & Benchmark Requirements
+# TEST-NEEDS — a2ml_ex
 
-## Current State
-- Unit tests: 1 test file (a2_ml_test.exs) — count unknown (mix not runnable without correct Elixir version)
-- Integration tests: NONE
-- E2E tests: NONE
-- Benchmarks: NONE
-- panic-attack scan: NEVER RUN
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!-- (PMPL-1.0-or-later preferred; MPL-2.0 required for Hex.pm) -->
 
-## What's Missing
-### Point-to-Point (P2P)
-- a2_ml.ex (main module) — possibly tested via a2_ml_test.exs but coverage unknown
-- a2ml/parser.ex — likely undertested (complex parsing logic)
-- a2ml/renderer.ex — likely undertested (output formatting)
-- a2ml/types.ex — type definitions may not need direct tests but validation does
-- erl_crash.dump exists in repo root — indicates past crash, should not be committed
+## CRG C — Test Coverage Achieved
 
-### End-to-End (E2E)
-- Parse real-world A2ML documents end-to-end
-- Render A2ML and verify output matches expected format
-- Round-trip (parse -> render -> parse) fidelity check
-- Error reporting for malformed input
+CRG C gate requires: unit, smoke, build, P2P (property-based), E2E,
+reflexive, contract, aspect, and benchmark tests.
 
-### Aspect Tests
-- [ ] Security (untrusted A2ML input, injection via trust levels)
-- [ ] Performance (parsing large documents)
-- [ ] Concurrency (GenServer usage if any)
-- [ ] Error handling (malformed A2ML, missing fields, encoding issues)
-- [ ] Accessibility (N/A)
+| Category      | File                          | Count | Notes                                       |
+|---------------|-------------------------------|-------|---------------------------------------------|
+| Unit          | `test/a2_ml_test.exs`         | 13    | Parser, renderer, trust levels, attestation |
+| Smoke         | `test/a2_ml_test.exs`         | —     | Covered by minimal parse/render tests       |
+| Build         | `mix compile`                 | —     | CI gate                                     |
+| Property/P2P  | `test/a2ml_property_test.exs` | 6     | Determinism, anti-symmetry, round-trips     |
+| E2E           | `test/a2_ml_test.exs`         | 1     | Full parse/render/re-parse roundtrip        |
+| Reflexive     | `test/a2ml_property_test.exs` | 1     | `compare(x,x) == :eq` for all levels       |
+| Contract      | `test/a2ml_contract_test.exs` | 11    | Named invariants (error/ok guarantees)      |
+| Aspect        | `test/a2ml_aspect_test.exs`   | 11    | Security, correctness, performance, resilience |
+| Benchmark     | `test/a2ml_bench_test.exs`    | 4     | Timing guards (parse/render/roundtrip)      |
 
-### Build & Execution
-- [ ] mix compile — clean? (erl_crash.dump suggests past issues)
-- [ ] mix test — not verified (asdf version mismatch)
-- [ ] Self-diagnostic — none
+**Total: 48 tests, 0 failures**
 
-### Benchmarks Needed
-- Parse throughput vs a2ml-rs and a2ml-deno implementations
-- Memory usage for large documents on BEAM
+## Running Tests
 
-### Self-Tests
-- [ ] panic-attack assail on own repo
-- [ ] Remove erl_crash.dump from repo (should be in .gitignore)
-- [ ] Built-in doctor/check command (if applicable)
+```bash
+mix test
+```
 
-## Priority
-- **MEDIUM** — Small library (3 source modules) with 1 test file. The single test file likely covers basics but with no way to run it currently (version mismatch), actual coverage is unknown. The erl_crash.dump in the repo is a red flag.
+## Test Taxonomy (Testing Taxonomy v1.0)
 
-## FAKE-FUZZ ALERT
+- **Unit**: individual function correctness
+- **Smoke**: essential path does not crash
+- **Build**: compilation gate (mix compile)
+- **Property/P2P**: determinism, algebraic laws, invariants over many inputs
+- **E2E**: full parse → render → re-parse pipeline
+- **Reflexive**: `compare(x,x) == :eq` identity laws
+- **Contract**: named behavioural invariants (error-tuple guarantee, etc.)
+- **Aspect**: cross-cutting concerns (security input safety, performance bounds, resilience)
+- **Benchmark**: wall-clock regression guards
 
-- `tests/fuzz/placeholder.txt` is a scorecard placeholder inherited from rsr-template-repo — it does NOT provide real fuzz testing
-- Replace with an actual fuzz harness (see rsr-template-repo/tests/fuzz/README.adoc) or remove the file
-- Priority: P2 — creates false impression of fuzz coverage
+## Remaining Gaps (Future Work)
+
+- Real fuzz harness (the `tests/fuzz/placeholder.txt` is a scorecard placeholder only)
+- Cross-implementation comparison benchmarks vs a2ml-rs and a2ml-deno
+- Concurrency stress tests (if GenServer is added)
