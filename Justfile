@@ -2,6 +2,8 @@
 # Justfile for a2ml_ex
 
 # Default recipe — list available commands
+import? "contractile.just"
+
 default:
     @just --list
 
